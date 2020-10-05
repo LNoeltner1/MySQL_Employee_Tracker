@@ -3,6 +3,7 @@ const mysql = require("mysql");
 const cTable = require("console.table");
 const fs = require("fs");
 const { allowedNodeEnvironmentFlags } = require("process");
+const { start } = require("repl");
 
 //App Initiation
 startApp();
@@ -53,6 +54,9 @@ function startApp() {
 }
 
 //function definitions
+let employees = [];
+let departments = [];
+let roles = [];
 
 function addEmployee() {
   const addEmployeeOptions = [
@@ -67,12 +71,12 @@ function addEmployee() {
       name: "lastname",
     },
     {
-      type: "input",
+      type: "number",
       message: "What is the empoyee's role ID?",
       name: "inputEmployeeRoleID",
     },
     {
-      type: "input",
+      type: "number",
       message: "What is the employee's manager ID?",
       name: "inputEmployeeManagerID",
     },
@@ -86,6 +90,10 @@ function addEmployee() {
         response.inputEmployeeRoleID,
         response.inputEmployeeManagerID
       );
+      employees.push(response.firstname + " " + response.lastname);
+      roles.push(response.inputEmployeeRoleID);
+      console.log(employees, roles);
+      startApp();
     })
     .catch((err) => {
       console.log(err);
@@ -93,11 +101,26 @@ function addEmployee() {
 }
 
 function addRole() {
-  const addRoleOptions = [{}];
-  inquirer.prompt(addRoleOptions).then(function (response) {
+  console.log(employees);
+  const selectEmployee = [
+    { type: "list", name: "employeelist", choices: employees },
+  ];
+  const roleAssignmentPrompt = [
+    {
+      type: "number",
+      message: "What role would you like to assign this employee?",
+      name: "roleAssignment",
+    },
+  ];
+  inquirer.prompt(selectEmployee).then(function (response) {
     console.log(response);
+
+    inquirer.prompt(roleAssignmentPrompt).then(function (response) {
+      roles.push(response);
+    });
   });
 }
+
 function addDepartment() {
   const addDeptOptions = [{}];
   inquirer.prompt(addDeptOptions).then(function (response) {
@@ -126,11 +149,13 @@ function updateRole() {
   const updateRoleOptions = [{}];
   inquirer.prompt(updateRoleOptions).then(function (response) {
     console.log(response);
+    startApp();
   });
 }
 function removeEmployee() {
   const removeOptions = [{}];
   inquirer.prompt(removeOptions).then(function (response) {
     console.log(response);
+    startApp();
   });
 }
