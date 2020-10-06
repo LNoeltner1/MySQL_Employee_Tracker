@@ -5,7 +5,29 @@ const fs = require("fs");
 const { allowedNodeEnvironmentFlags } = require("process");
 const { start } = require("repl");
 
-//App Initiation
+var connection = mysql.createConnection({
+  host: "localhost",
+  port: 3306,
+  user: "root",
+  password: "LaurensPassword",
+  database: //fill in,
+});
+connection.connect(function(err) {
+  if (err) throw err;
+  console.log("connected as id " + connection.threadId + "\n");
+  connection.query ("SELECT * FROM databaseNamme", function (err, data) {
+    if (err) throw err;
+    console.table(data)
+  })
+});
+// var con = mysql.createConnection({
+//   host: "localhost",
+//   user: "yourusername", //TODO: fill in
+//   password: "LaurensPassword",
+//   database: "mydb", //TODO: fill in
+// });
+
+//App Initiation and main set of options
 startApp();
 function startApp() {
   const initQuestion = [
@@ -72,12 +94,12 @@ function addEmployee() {
     },
     {
       type: "number",
-      message: "What is the empoyee's role ID?",
+      message: "What is the empoyee's role ID number?", //OR: give hardcode selection of the company roles
       name: "inputEmployeeRoleID",
     },
     {
       type: "number",
-      message: "What is the employee's manager ID?",
+      message: "What is the employee's manager ID number?", //OR: ask 'Who does this employee answer to?'
       name: "inputEmployeeManagerID",
     },
   ];
@@ -92,7 +114,7 @@ function addEmployee() {
       );
       employees.push(response.firstname + " " + response.lastname);
       roles.push(response.inputEmployeeRoleID);
-      console.log(employees, roles);
+      console.log(response.firstname + response.lastname, roles);
       startApp();
     })
     .catch((err) => {
@@ -117,6 +139,8 @@ function addRole() {
 
     inquirer.prompt(roleAssignmentPrompt).then(function (response) {
       roles.push(response);
+      console.log(roles);
+      startApp();
     });
   });
 }
