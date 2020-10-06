@@ -5,26 +5,20 @@ const fs = require("fs");
 const { allowedNodeEnvironmentFlags } = require("process");
 const { start } = require("repl");
 
-var connection = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "LaurensPassword",
-  database: //fill in,
-});
-connection.connect(function(err) {
-  if (err) throw err;
-  console.log("connected as id " + connection.threadId + "\n");
-  connection.query ("SELECT * FROM databaseNamme", function (err, data) {
-    if (err) throw err;
-    console.table(data)
-  })
-});
-// var con = mysql.createConnection({
+// var connection = mysql.createConnection({
 //   host: "localhost",
-//   user: "yourusername", //TODO: fill in
+//   port: 3306,
+//   user: "root",
 //   password: "LaurensPassword",
-//   database: "mydb", //TODO: fill in
+//   database: //fill in,
+// });
+// connection.connect(function(err) {
+//   if (err) throw err;
+//   console.log("connected as id " + connection.threadId + "\n");
+//   connection.query ("SELECT * FROM databaseNamme", function (err, data) {
+//     if (err) throw err;
+//     console.table(data)
+//   })
 // });
 
 //App Initiation and main set of options
@@ -134,39 +128,109 @@ function addRole() {
       name: "roleAssignment",
     },
   ];
+  inquirer
+    .prompt(selectEmployee)
+    .then(function (response) {
+      console.log(response);
+
+      inquirer
+        .prompt(roleAssignmentPrompt)
+        .then(function (response) {
+          roles.push(response);
+          console.table(roles);
+          startApp();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+function addDepartment() {
+  console.table(departments);
+  const selectEmployee = [
+    { type: "list", name: "employeelist", choices: employees },
+  ];
+  const addDeptOptions = [
+    {
+      type: "input",
+      message: "What department would you like to assign this employee to?",
+      name: "departmentAssignment",
+    },
+  ];
   inquirer.prompt(selectEmployee).then(function (response) {
     console.log(response);
 
-    inquirer.prompt(roleAssignmentPrompt).then(function (response) {
-      roles.push(response);
-      console.log(roles);
+    inquirer.prompt(addDeptOptions).then(function (response) {
+      departments.push(response);
+      console.table(departments);
       startApp();
     });
   });
 }
 
-function addDepartment() {
-  const addDeptOptions = [{}];
-  inquirer.prompt(addDeptOptions).then(function (response) {
-    console.log(response);
-  });
-}
 function viewEmployees() {
-  const viewEmployeeOptions = [{}];
-  inquirer.prompt(viewEmployeeOptions).then(function (response) {
+  const selectEmployee = [
+    { type: "list", name: "employeelist", choices: employees },
+  ];
+  const currentEmployeeOptions = [
+    {
+      type: "list",
+      name: "changeEmployee",
+      choices: ["Change Employee's Department", "Change Employee's Role"],
+    },
+  ];
+  const changeDept = [
+    {
+      type: "number",
+      message: "To what department would you like to reassign this employee?",
+      name: "change_department",
+    },
+  ];
+  const roleAssignmentPrompt = [
+    {
+      type: "number",
+      message: "What role would you like to assign this employee?",
+      name: "roleAssignment",
+    },
+  ];
+  inquirer.prompt(selectEmployee).then(function (response) {
     console.log(response);
+    inquirer.prompt(currentEmployeeOptions).then(function (response) {
+      if (response === "Change Employee's Department") {
+        inquirer.prompt(changeDept).then(function (response) {
+          departments.push(response);
+          console.log(departments);
+          startApp();
+        });
+      } else {
+        inquirer.prompt(roleAssignmentPrompt).then(function (response) {
+          roles.push(response);
+          console.table(roles);
+          startApp();
+        });
+      }
+      console.table(employees);
+      console.table(roles);
+      console.table(departments);
+    });
   });
 }
 function viewRoles() {
   const viewRoleOptions = [{}];
   inquirer.prompt(viewRoleOptions).then(function (response) {
     console.log(response);
+    startApp();
   });
 }
 function viewDepartments() {
   const viewDeptOptions = [{}];
   inquirer.prompt(viewDeptOptions).then(function (response) {
     console.log(response);
+    startApp();
   });
 }
 function updateRole() {
