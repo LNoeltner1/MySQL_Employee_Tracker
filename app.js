@@ -5,21 +5,17 @@ const fs = require("fs");
 const { allowedNodeEnvironmentFlags } = require("process");
 const { start } = require("repl");
 
-// var connection = mysql.createConnection({
-//   host: "localhost",
-//   port: 3306,
-//   user: "root",
-//   password: "LaurensPassword",
-//   database: //fill in,
-// });
-// connection.connect(function(err) {
-//   if (err) throw err;
-//   console.log("connected as id " + connection.threadId + "\n");
-//   connection.query ("SELECT * FROM databaseNamme", function (err, data) {
-//     if (err) throw err;
-//     console.table(data)
-//   })
-// });
+var connection = mysql.createConnection({
+  host: "localhost",
+  port: 3306,
+  user: "root",
+  password: "LaurensPassword",
+  database: "employee_db",
+});
+connection.connect(function (err) {
+  if (err) throw err;
+  console.log("connected as id " + connection.threadId + "\n");
+});
 
 //App Initiation and main set of options
 startApp();
@@ -42,38 +38,31 @@ function startApp() {
     },
   ];
 
-  inquirer
-    .prompt(initQuestion)
-    .then(function (response) {
-      //   console.log(response);
-      if (response.mainQuestion == "Add Employee") {
-        addEmployee();
-      } else if (response.mainQuestion == "Add Role") {
-        addRole();
-      } else if (response.mainQuestion == "Add Department") {
-        addDepartment();
-      } else if (response.mainQuestion == "View Employees") {
-        viewEmployees();
-      } else if (response.mainQuestion == "View Roles") {
-        viewRoles();
-      } else if (response.mainQuestion == "View Departments") {
-        viewDepartments();
-      } else if (response.mainQuestion == "Update Employee Role") {
-        updateRole();
-      } else if (response.mainQuestion == "Remove Employee") {
-        removeEmployee();
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  inquirer.prompt(initQuestion).then(function (response) {
+    //   console.log(response);
+    if (response.mainQuestion == "Add Employee") {
+      addEmployee();
+    } else if (response.mainQuestion == "Add Role") {
+      addRole();
+    } else if (response.mainQuestion == "Add Department") {
+      addDepartment();
+    } else if (response.mainQuestion == "View Employees") {
+      viewEmployees();
+    } else if (response.mainQuestion == "View Roles") {
+      viewRoles();
+    } else if (response.mainQuestion == "View Departments") {
+      viewDepartments();
+    } else if (response.mainQuestion == "Update Employee Role") {
+      updateRole();
+    } else if (response.mainQuestion == "Remove Employee") {
+      removeEmployee();
+    }
+    // .catch((err) => {
+    //   console.log(err);
+    // });
+  });
 }
-
 //function definitions
-let employees = [];
-let departments = [];
-let roles = [];
-
 function addEmployee() {
   const addEmployeeOptions = [
     {
@@ -100,150 +89,166 @@ function addEmployee() {
   inquirer
     .prompt(addEmployeeOptions)
     .then(function (response) {
-      console.log(
-        response.firstname,
-        response.lastname,
-        response.inputEmployeeRoleID,
-        response.inputEmployeeManagerID
+      var query2 = "INSERT INTO employees SET ?";
+      connection.query(
+        query2,
+        {
+          first_name: response.firstname,
+          last_name: response.lastname,
+          role_id: response.inputEmployeeRoleID,
+          manager_id: response.inputEmployeeManagerID,
+        },
+        function (err, data) {
+          if (err) throw err;
+          console.log(data);
+        }
       );
-      employees.push(response.firstname + " " + response.lastname);
-      roles.push(response.inputEmployeeRoleID);
-      console.log(response.firstname + response.lastname, roles);
-      startApp();
+      var query3 =
+        "SELECT e.first_name, e.last_name, r.role_name, r.salary, e.manager_id, m.first_name AS manager_firstname, m.last_name AS manager_lastname, r.department_id ";
+      query3 += "FROM employee_db.employees e ";
+      query3 += "INNER JOIN employee_db.employees m ON e.manager_id = m.id ";
+      query3 += "INNER JOIN employee_db.roles r ON e.role_id = r.id ";
+      query3 +=
+        "INNER JOIN employee_db.departments d ON r.department_id = d.id";
+      connection.query(query3, function (err, data) {
+        if (err) throw err;
+        console.table(data);
+        // startApp();
+      });
     })
     .catch((err) => {
       console.log(err);
     });
 }
 
-function addRole() {
-  console.log(employees);
-  const selectEmployee = [
-    { type: "list", name: "employeelist", choices: employees },
-  ];
-  const roleAssignmentPrompt = [
-    {
-      type: "number",
-      message: "What role would you like to assign this employee?",
-      name: "roleAssignment",
-    },
-  ];
-  inquirer
-    .prompt(selectEmployee)
-    .then(function (response) {
-      console.log(response);
+// function addRole() {
+//   const roleAssignmentPrompt = [
+//     {
+//       type: "number",
+//       message: "What role would you like to create?",
+//       name: "addrole",
+//     },
+//   ];
+//   inquirer.prompt(roleAssignmentPrompt).then(function (response) {
+//     var query8 = "INSERT INTO roles SET ?";
+//     connection.query(query8, { role_name: response.name }, function (
+//       err,
+//       data
+//     ) {
+//       if (err) throw err;
+//     });
+//     var query9 = "SELECT * FROM roles";
+//     connection
+//       .query(query9, function (err, data) {
+//         if (err) throw err;
+//         console.table(data);
+//         // startApp();
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   });
+// }
 
-      inquirer
-        .prompt(roleAssignmentPrompt)
-        .then(function (response) {
-          roles.push(response);
-          console.table(roles);
-          startApp();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-}
+// function addDepartment() {
+//   const addDeptOptions = [
+//     {
+//       type: "input",
+//       message: "What department would you like to add?",
+//       name: "adddepartment",
+//     },
+//   ];
+//   inquirer.prompt(addDeptOptions).then(function (response) {
+//     var query10 = "INSERT INTO departments SET ?";
+//     connection.query(
+//       query10,
+//       {
+//         department_name: response.name,
+//       },
+//       function (err, data) {
+//         if (err) throw err;
+//         console.table(data);
+//       }
+//     );
+//   });
+// }
 
-function addDepartment() {
-  console.table(departments);
-  const selectEmployee = [
-    { type: "list", name: "employeelist", choices: employees },
-  ];
-  const addDeptOptions = [
-    {
-      type: "input",
-      message: "What department would you like to assign this employee to?",
-      name: "departmentAssignment",
-    },
-  ];
-  inquirer.prompt(selectEmployee).then(function (response) {
-    console.log(response);
+// function viewEmployees() {
+//   var query7 =
+//     "SELECT e.first_name, e.last_name, r.role_name, r.salary, e.manager_id, m.first_name AS manager_firstname, m.last_name AS manager_lastname, r.department_id ";
+//   query7 += "FROM employee_db.employees e ";
+//   query7 += "INNER JOIN employee_db.employees m ON e.manager_id = m.id ";
+//   query7 += "INNER JOIN employee_db.roles r ON e.role_id = r.id ";
+//   query7 += "INNER JOIN employee_db.departments d ON r.department_id = d.id";
+//   connection.query(query7, function (err, data) {
+//     if (err) throw err;
+//     console.table(data);
+//   });
 
-    inquirer.prompt(addDeptOptions).then(function (response) {
-      departments.push(response);
-      console.table(departments);
-      startApp();
-    });
-  });
-}
+//   inquirer
+//     .prompt({ name: "back", message: "", choices: "BACK" })
+//     .then(function (response) {
+//       // startApp();
+//     });
+// }
 
-function viewEmployees() {
-  const selectEmployee = [
-    { type: "list", name: "employeelist", choices: employees },
-  ];
-  const currentEmployeeOptions = [
-    {
-      type: "list",
-      name: "changeEmployee",
-      choices: ["Change Employee's Department", "Change Employee's Role"],
-    },
-  ];
-  const changeDept = [
-    {
-      type: "number",
-      message: "To what department would you like to reassign this employee?",
-      name: "change_department",
-    },
-  ];
-  const roleAssignmentPrompt = [
-    {
-      type: "number",
-      message: "What role would you like to assign this employee?",
-      name: "roleAssignment",
-    },
-  ];
-  inquirer.prompt(selectEmployee).then(function (response) {
-    console.log(response);
-    inquirer.prompt(currentEmployeeOptions).then(function (response) {
-      if (response === "Change Employee's Department") {
-        inquirer.prompt(changeDept).then(function (response) {
-          departments.push(response);
-          console.log(departments);
-          startApp();
-        });
-      } else {
-        inquirer.prompt(roleAssignmentPrompt).then(function (response) {
-          roles.push(response);
-          console.table(roles);
-          startApp();
-        });
-      }
-      console.table(employees);
-      console.table(roles);
-      console.table(departments);
-    });
-  });
-}
-function viewRoles() {
-  const viewRoleOptions = [{}];
-  inquirer.prompt(viewRoleOptions).then(function (response) {
-    console.log(response);
-    startApp();
-  });
-}
-function viewDepartments() {
-  const viewDeptOptions = [{}];
-  inquirer.prompt(viewDeptOptions).then(function (response) {
-    console.log(response);
-    startApp();
-  });
-}
-function updateRole() {
-  const updateRoleOptions = [{}];
-  inquirer.prompt(updateRoleOptions).then(function (response) {
-    console.log(response);
-    startApp();
-  });
-}
-function removeEmployee() {
-  const removeOptions = [{}];
-  inquirer.prompt(removeOptions).then(function (response) {
-    console.log(response);
-    startApp();
-  });
-}
+//   function viewRoles() {
+//     var query5 = "SELECT * FROM roles";
+//     connection.query(query5, function (err, data) {
+//       if (err) throw err;
+//       console.table(data);
+//     });
+
+//     inquirer
+//       .prompt({ name: "back", message: "", choices: "BACK" })
+//       .then(function (response) {
+//         // startApp();
+//       });
+//   }
+
+//   function viewDepartments() {
+//     var query6 = "SELECT * FROM departments";
+//     connection.query(query6, function (err, data) {
+//       if (err) throw err;
+//       console.table(data);
+//     });
+
+//     inquirer
+//       .prompt({ name: "back", message: "", choices: "BACK" })
+//       .then(function (response) {
+//         // startApp();
+//       });
+//   }
+
+//   function updateRole() {
+//     const roleAssignmentPrompt = [
+//       {
+//         type: "number",
+//         message: "What role would you like to assign this employee?",
+//         name: "roleAssignment",
+//       },
+//     ];
+//     inquirer.prompt(roleAssignmentPrompt).then(function (response) {
+//       console.log(response);
+//       startApp();
+//     });
+//   }
+//   function removeEmployee() {
+//     const removeOptions = [{}];
+//     inquirer.prompt(removeOptions).then(function (response) {
+//       console.log(response);
+//       // startApp();
+//     });
+//   }
+// }
+
+//example mysql query
+// connection.query(
+//   "SELECT position, artist, song FROM songs where year BETWEEN ? AND ?;",
+//   [firstNumber, secondNumber],
+//   (err, data) => {
+//     if (err) throw err;
+//     console.table(data);
+//     connection.end();
+//   }
+// );
