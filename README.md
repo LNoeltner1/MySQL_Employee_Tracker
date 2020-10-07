@@ -21,7 +21,7 @@ In this project, I built a command line application that allows a business owner
 
 ## Installation:
 
-Clone the repository and open in your terminal. Make sure to run "npm install" to download the required Clone the repository and open in your terminal. Make sure to run "npm install" to download the required
+Clone the repository and open in your terminal. Make sure to run "npm install" to download the required
 packages. Then, run "node app.js" to initiate the application.
 
 ## Usage
