@@ -27,13 +27,12 @@ function startApp() {
       name: "mainQuestion",
       choices: [
         "Add Employee",
-        "Add Role",
         "Add Department",
         "View Employees",
         "View Roles",
         "View Departments",
         "Update Employee Role",
-        "Remove Employee",
+        "EXIT",
       ],
     },
   ];
@@ -42,8 +41,6 @@ function startApp() {
     //   console.log(response);
     if (response.mainQuestion == "Add Employee") {
       addEmployee();
-    } else if (response.mainQuestion == "Add Role") {
-      addRole();
     } else if (response.mainQuestion == "Add Department") {
       addDepartment();
     } else if (response.mainQuestion == "View Employees") {
@@ -54,8 +51,8 @@ function startApp() {
       viewDepartments();
     } else if (response.mainQuestion == "Update Employee Role") {
       updateRole();
-    } else if (response.mainQuestion == "Remove Employee") {
-      removeEmployee();
+    } else if (response.mainQuestion == "EXIT") {
+      connection.end();
     }
     // .catch((err) => {
     //   console.log(err);
@@ -130,7 +127,7 @@ function addEmployee() {
     });
 }
 
-function addRole() {
+function updateRole() {
   const roleAssignmentPrompt = [
     {
       type: "input",
@@ -166,7 +163,6 @@ function addRole() {
       if (err) throw err;
       console.log("=======================================");
       console.table(data);
-      // startApp();
     });
     inquirer
       .prompt({
@@ -200,8 +196,6 @@ function addDepartment() {
       },
       function (err, data) {
         if (err) throw err;
-        console.log("=======================================");
-        console.table(data);
       }
     );
     inquirer
@@ -264,36 +258,3 @@ function viewDepartments() {
       startApp();
     });
 }
-
-//   function updateRole() {
-//     const roleAssignmentPrompt = [
-//       {
-//         type: "number",
-//         message: "What role would you like to assign this employee?",
-//         name: "roleAssignment",
-//       },
-//     ];
-//     inquirer.prompt(roleAssignmentPrompt).then(function (response) {
-//       console.log(response);
-//       startApp();
-//     });
-//   }
-//   function removeEmployee() {
-//     const removeOptions = [{}];
-//     inquirer.prompt(removeOptions).then(function (response) {
-//       console.log(response);
-//       // startApp();
-//     });
-//   }
-// }
-
-//example mysql query
-// connection.query(
-//   "SELECT position, artist, song FROM songs where year BETWEEN ? AND ?;",
-//   [firstNumber, secondNumber],
-//   (err, data) => {
-//     if (err) throw err;
-//     console.table(data);
-//     connection.end();
-//   }
-// );
